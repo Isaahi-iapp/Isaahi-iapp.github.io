@@ -1,0 +1,12 @@
+{
+  "name": "iApp Compiler Project",
+  "short_name": "iApp",
+  "start_url": "index.html",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "files": [
+    "main.cpp",
+    "app.html",
+    "style.css"
+  ]
+}
