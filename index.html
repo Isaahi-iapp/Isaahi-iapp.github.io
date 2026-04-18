@@ -3,60 +3,64 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>iApp Compiler</title>
+    <title>iApp Compiler (iPad Optimized)</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
     <style>
-        body { font-family: system-ui; padding: 20px; line-height: 1.6; max-width: 800px; margin: auto; background: #f4f4f9; }
-        textarea { width: 100%; height: 150px; font-family: monospace; margin-bottom: 20px; border-radius: 8px; border: 1px solid #ccc; padding: 10px; }
-        button { background: #007aff; color: white; border: none; padding: 12px 24px; border-radius: 8px; cursor: pointer; font-size: 16px; }
-        button:hover { background: #0056b3; }
-        .file-section { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin-bottom: 20px; }
-        h2 { margin-top: 0; color: #333; }
+        body { font-family: -apple-system, system-ui; padding: 20px; background: #f2f2f7; color: #1c1c1e; }
+        .card { background: white; padding: 20px; border-radius: 15px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); margin-bottom: 20px; }
+        textarea { width: 100%; height: 120px; font-family: ui-monospace, monospace; border: 1px solid #d1d1d6; border-radius: 8px; padding: 12px; box-sizing: border-box; margin-top: 10px; font-size: 14px; }
+        h2 { margin: 0; font-size: 18px; color: #007aff; }
+        button { width: 100%; background: #007aff; color: white; border: none; padding: 18px; border-radius: 12px; font-weight: 600; font-size: 17px; margin-top: 10px; }
+        button:active { background: #0051a8; transform: scale(0.98); }
+        .filename { font-size: 12px; color: #8e8e93; font-weight: bold; text-transform: uppercase; }
     </style>
 </head>
 <body>
 
-    <h1>.iapp Compiler</h1>
-    <p>Paste your code below to bundle it into a mobile-ready app package.</p>
+    <h1 style="text-align:center;">.iapp Bundler</h1>
 
-    <div class="file-section">
-        <h2>C++ Logic (main.cpp)</h2>
+    <div class="card">
+        <span class="filename">index.html</span>
+        <textarea id="html-code"><h1>Hello World</h1>
+<p>This is my first .iapp running live!</p></textarea>
+    </div>
+
+    <div class="card">
+        <span class="filename">main.cpp</span>
         <textarea id="cpp-code">#include <iostream>
 int main() {
-    std::cout << "Hello from C++!" << std::endl;
     return 0;
 }</textarea>
     </div>
 
-    <div class="file-section">
-        <h2>HTML Interface (index.html)</h2>
-        <textarea id="html-code"><h1>Welcome to my iApp</h1>
-<p id="output">C++ output will appear here...</p></textarea>
+    <div class="card">
+        <span class="filename">style.css</span>
+        <textarea id="css-code">body { background: #fff; text-align: center; padding-top: 50px; font-family: sans-serif; }</textarea>
     </div>
 
-    <button onclick="generateIApp()">Compile & Download .iapp</button>
+    <button onclick="compileIApp()">Build my_app.iapp</button>
 
     <script>
-        async function generateIApp() {
+        async function compileIApp() {
             const zip = new JSZip();
             
-            // Add the files to the bundle
+            // Add all project files
+            zip.file("index.html", document.getElementById('html-code').value);
             zip.file("main.cpp", document.getElementById('cpp-code').value);
-            zip.file("app.html", document.getElementById('html-code').value);
-            zip.file("manifest.json", JSON.stringify({
-                name: "My Custom iApp",
-                version: "1.0.0",
-                created_on: new Date().toISOString()
-            }, null, 2));
-
-            // Generate the blob
-            const content = await zip.generateAsync({type:"blob"});
+            zip.file("style.css", document.getElementById('css-code').value);
             
-            // Trigger download with .iapp extension
+            // Generate the binary blob
+            // We use octet-stream to prevent Safari from forcing a .zip extension
+            const content = await zip.generateAsync({type:"blob", compression: "DEFLATE"});
+            const fileBlob = new Blob([content], {type: "application/octet-stream"});
+            
             const link = document.createElement('a');
-            link.href = URL.createObjectURL(content);
-            link.download = "my_project.iapp";
+            link.href = URL.createObjectURL(fileBlob);
+            link.download = "my_app.iapp"; // This forces the custom extension
+            
+            document.body.appendChild(link);
             link.click();
+            document.body.removeChild(link);
         }
     </script>
 </body>
